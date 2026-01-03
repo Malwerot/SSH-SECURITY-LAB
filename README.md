@@ -12,7 +12,9 @@ Operating System: Arch Linux (Virtual Machine on Oracle VirtualBox)
 Tools used:
 
 OpenSSH (sshd)
+
 iptables (firewall)
+
 systemd / systemctl (service management)
 
 
