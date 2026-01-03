@@ -8,11 +8,16 @@ Implement security hardening measures on an SSH server to reduce unauthorized ac
 ⚙️ Environment
 
 Operating System: Arch Linux (Virtual Machine on Oracle VirtualBox)
+
 Tools used:
+
 OpenSSH (sshd)
 iptables (firewall)
 systemd / systemctl (service management)
+
+
 🛡️ Applied Configurations
+
 1️⃣ Default SSH Port Change
 
 The default SSH port was changed to reduce exposure to automated scans and brute-force attempts.
