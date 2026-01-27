@@ -121,3 +121,164 @@ Successful login using SSH key authentication only
 Password authentication rejected
 ✅ Outcome
 This hardening process significantly reduces the SSH attack surface and establishes a secure baseline for future SOC-oriented monitoring and network defense projects.
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+🚀 Rodando o Elasticsearch
+
+cd elasticsearch-8.15.0
+./bin/elasticsearch
+
+O servidor sobe na porta 9200.
+
+Teste com:
+
+curl http://localhost:9200
+
+Deve retornar um JSON com informações da versão.
+
+
+
+📊 Rodando o Kibana
+
+cd kibana-8.15.0
+./bin/kibana
+
+Acesse via navegador:
+
+http://localhost:5601
+
+⚠️ Dicas importantes
+
+Versão igual: mantenha Elasticsearch e Kibana na mesma versão (ex.: ambos 8.15).
+
+Memória: Elasticsearch exige pelo menos 2 GB livres.
+
+Primeira execução: serão geradas senhas e tokens no terminal. Guarde-os, pois o Kibana solicitará.
+
+
+
+📦 Filebeat: Coletando Logs do Sistema
+
+Instalação e verificação
+
+./filebeat version
+
+Deve retornar 9.2.3
+
+Habilitar módulo system (captura de syslog e SSH)
+
+./filebeat modules enable system
+
+Configuração do filebeat.yml
+
+output.elasticsearch:
+  hosts: ["localhost:9200"]
+  username: "elastic"
+  password: "sua_senha"
+  ssl:
+    certificate_authorities: ["/caminho/para/certificado.crt"]
+setup.kibana:
+  host: "localhost:5601"
+
+Inicializar dashboards e ingest pipelines
+
+./filebeat setup
+
+Rodar o Filebeat
+
+./filebeat -e
+
+
+
+📁 Logs Capturados (exemplo real)
+
+Dashboard Kibana: [Filebeat System] Syslog dashboard ECS
+
+Bar chart: eventos por hostname → archlinux
+
+Donut chart: processos → opera (59.65%)
+
+
+Tabela de logs:
+
+
+Timestamp     Hostname     Processo     Mensagem
+06:02:19     archlinux      opera     Uncaught (in promise) Error
+06:01:42     archlinux   wireplumber  wp-event-dispatcher failed
+05:58:56     archlinux      opera     ERROR: gpu command buffer
+05:58:30     archlinux     systemd    Started Session 6 of User m4
+
+
+🛠️ Configuração Avançada: journald como input
+
+- type: journald
+  seek: head
+  include_lines: ['ERR', 'WARN']
+  #fields:
+  #  level: debug
+  #  review: 1
+
+
+🔍 Segurança e Monitoramento de Rede
+
+Scan de portas com Nmap
+
+nmap -sV -p 9200 0.0.0.0
+
+Porta 2222/tcp: OpenSSH 10.2
+
+Porta 9200/tcp: Elasticsearch REST API 7.0+ com SSL
+
+
+✅ Boas Práticas com Elasticsearch
+
+Segurança: habilite autenticação e criptografia (TLS/SSL).
+
+Indexação: defina políticas de ciclo de vida (ILM) para evitar sobrecarga.
+
+Templates: se modificar o nome do índice, configure setup.template.name e setup.template.pattern.
+
+Monitoramento: use Kibana ou Grafana para acompanhar métricas.
+
+Backups: configure snapshots regulares.
+
+
+
+
+
+🔮 Futuras Atualizações:
+
+🌍 Inclusão de GeoIP
+
+Ative o processador geoip no pipeline de ingestão.
+
+Permite visualizar localização geográfica de conexões SSH.
+
+Exemplo de configuração:
+
+processors:
+  - decode_json_fields:
+      fields: ["message"]
+      target: "json"
+  - geoip:
+      field: "source.ip"
+      target_field: "geo"
+
+
+📈 Alertas e Análises
+
+Configure alertas no Kibana para:
+
+Múltiplas falhas de login
+
+Conexões de IPs suspeitos
+
+Atividades fora do horário padrão
+
+
+🧠 Conclusão
+
+Com Elasticsearch, Kibana e Filebeat integrados, você tem uma stack poderosa para observabilidade, segurança e análise em tempo real. A inclusão de GeoIP e boas práticas de configuração garantem escalabilidade e confiabilidade para ambientes Linux com foco em logs de sistema e conexões SSH.
